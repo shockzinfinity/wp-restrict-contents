@@ -55,10 +55,15 @@ function restrict_filter($content)
 	global $post;
 	global $wpdb;
 
-	$post_id = $post->ID;
+	// 보기 권한 체크할 post id 등록 부분
+	$check_posts = array(215241, 215961);
 
-	// TODO: 여기서 특정 post_id 체크, array 로 체크, 추후 확장가능하도록 custom post type 으로 분리 필요
-	// custom post type 으로 분리하게 되면 post meta 체크해서 별도 쿼리 필요
+	$post_id = $post->ID;
+	if (!in_array($post_id, $check_posts)) {
+		// TODO: 여기서 특정 post_id 체크, array 로 체크, 추후 확장가능하도록 custom post type 으로 분리 필요
+		// custom post type 으로 분리하게 되면 post meta 체크해서 별도 쿼리 필요
+		return $content;
+	}
 
 	$current_user = wp_get_current_user();
 	$username = $current_user->user_login;
@@ -74,15 +79,14 @@ function restrict_filter($content)
 	//    값이 1 일 경우는 볼 수 있음
 	// 3. true 일 경우엔 return $content
 	// 4. false 일 경우엔 message (상품을 구매해야 볼 수 있습니다.)
-	echo $result;
+	//echo $result;
 	if ($result) {
+		// $content = '<h2>ALLOWED !!!!!!!!!!!</h2>' . $content;
 		return $content;
 	} else {
 		$html = '<pre>';
-		// meta 체크???
-		//$temp_meta = get_post_meta($post->ID, "classic-editor-remember", true);
+		//$temp_meta = get_post_meta($post_id, "classic-editor-remember", true);
 		$html .= "<h2>NOT ALLOWED</h2>";
-
 		$html .= '</pre>';
 
 		return $html;
