@@ -1,5 +1,4 @@
 <?php
-
 /*
   Plugin Name: Restrict contents
   Plugin URI: https://shockzinfinity.github.io
@@ -8,8 +7,16 @@
   Author: shockz
   Author URI: https://shockzinfinity.github.io
   Text Domain: shockz-restrict-admin-page
-  License: MIT
+  Licence: MIT
+  License URI: http://opensource.org/licenses/MIT
  */
+
+// if (!define('WPINC')) {
+//   die;
+// }
+
+include_once(plugin_dir_path(__FILE__) . 'shared/class-deserializer.php');
+include_once(plugin_dir_path(__FILE__) . 'public/class-content-messenger.php');
 
 function restrict_contents_activation()
 {
@@ -94,34 +101,23 @@ function restrict_filter($content)
   }
 }
 
-function restrict_admin_page_contents()
-{
-?>
-  <h1><?php esc_html_e('Restrict admin page.', 'restrict-textdomain'); ?></h1>
-<?php
+// include the dependencies needed to instantiate the plugin.
+foreach (glob(plugin_dir_path(__FILE__) . 'admin/*.php') as $file) {
+  include_once $file;
 }
 
-function restrict_admin_menu()
+add_action('plugins_loaded', 'restrict_custom_settings');
+function restrict_custom_settings()
 {
-  add_menu_page(__('Restrict Settings', 'restrict-textdomain'), __('Restrict Settings', 'restrict-textdomain'), 'manage_options', 'restrict-setting-page', 'restrict_admin_page_contents', 'dashicons-schedule', 66);
-}
-add_action('admin_menu', 'restrict_admin_menu');
+  $serializer = new Serializer();
+  $serializer->init();
 
-function register_plugin_scripts()
-{
-  // wp_register_style('my-plugin', plugins_url('ddd/css/plugin.css'));
-  // wp_register_script('my-plugin', plugins_url('ddd/js/plugin.js'));
-}
-add_action('admin_enqueue_scripts', 'register_plugin_scripts');
+  $deserializer = new Deserializer();
 
-function load_plugin_scripts($hook)
-{
-  // Load only on ?page=restrict-setting-page
-  if ($hook != 'toplevel_page_restrict-setting-page') {
-    return;
-  }
-  // Load style & scripts.
-  // wp_enqueue_style('my-plugin');
-  // wp_enqueue_script('my-plugin');
+  // $plugin = new Submenu(new Submenu_Page($serializer));
+  $plugin = new Submenu(new Submenu_Page($deserializer));
+  $plugin->init();
+
+  $public = new Content_messaenger($deserializer);
+  $public->init();
 }
-add_action('admin_enqueue_scripts', 'load_plugin_scripts');
