@@ -1,6 +1,6 @@
 <?php
 
-class Content_messaenger
+class Content_messenger
 {
   private $deserializer;
 

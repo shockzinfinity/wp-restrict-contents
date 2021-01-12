@@ -115,7 +115,7 @@ function restrict_custom_settings()
   $deserializer = new Deserializer();
 
   // $plugin = new Submenu(new Submenu_Page($serializer));
-  $plugin = new Submenu(new Submenu_Page($deserializer));
+  $plugin = new Submenu(new Submenu_Page($serializer, $deserializer));
   $plugin->init();
 
   $public = new Content_messaenger($deserializer);
