@@ -55,22 +55,25 @@ function restrict_filter($content)
     return $content;
   }
 
-  // 여기서 로그인 여부 체크
-  if (!is_user_logged_in()) {
-    return;
-  }
-
   global $post;
   global $wpdb;
-
   // 보기 권한 체크할 post id 등록 부분
-  $check_posts = array(215241, 215961);
+  // TODO: 플러그인 활성화 체크 후, 디비 데이터 기준으로 제한 걸려 있는 포스트 아이디 조회
+  // 테이블 인덱싱 고려
+  $check_posts = array(215436);
 
   $post_id = $post->ID;
   if (!in_array($post_id, $check_posts)) {
     // TODO: 여기서 특정 post_id 체크, array 로 체크, 추후 확장가능하도록 custom post type 으로 분리 필요
     // custom post type 으로 분리하게 되면 post meta 체크해서 별도 쿼리 필요
     return $content;
+  }
+
+  // 여기서 로그인 여부 체크
+  if (!is_user_logged_in()) {
+    // TODO: $post 의 메타 데이터 조회하여 ref-url 로 보낼 permalink 로 처리 필요
+    wp_redirect('/login/?ref-url=/2020/12/22/215436/');
+    //return;
   }
 
   $current_user = wp_get_current_user();
@@ -100,6 +103,21 @@ function restrict_filter($content)
     return $html;
   }
 }
+
+// add_filter('login_redirect', 'redirect_previous_page', 10, 1);
+// function redirect_previous_page($redirect_to)
+// {
+// 	global $user;
+// 	$request = $_SERVER["HTTP_REFERER"];
+
+// 	if (in_array($user->roles[0], array('administrator'))) {
+// 		return admin_url();
+// 	} elseif (in_array($user->roles[0], array('subscriber'))) {
+// 		return $request;
+// 	}
+
+// 	return $redirect_to;
+// }
 
 // include the dependencies needed to instantiate the plugin.
 foreach (glob(plugin_dir_path(__FILE__) . 'admin/*.php') as $file) {
